@@ -1,0 +1,25 @@
+# Python / uv virtual environment
+.venv/
+
+# Environment / secrets — never commit these
+.env
+.env.local
+.env.*.local
+
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# DeepEval local output and settings
+.deepeval/
+deepeval-results/
+
+# Logs
+*.log
+
+# IDE / editor files
+.vscode/
+.idea/
