@@ -92,3 +92,45 @@ Expected output (verified on this machine):
 ```powershell
 uv run python -c "import deepeval; print(deepeval.__version__)"
 ```
+
+---
+
+## Run your first test
+
+```powershell
+deepeval test run test_01_Ans_Relevency.py
+```
+
+| | |
+|---|---|
+| **What it does** | Runs pytest on the test file and evaluates the `LLMTestCase` against the metric (`AnswerRelevancyMetric`). Every metric is an **LLM-as-a-judge**: deepeval asks an LLM to grade the output, so an API key + provider must be configured (see below). |
+| **Why we ran it** | This is the standard way to run deepeval tests. It prints a results table with per-metric score, pass/fail status (threshold), the judge model used, and the LLM's reason. |
+
+Expected result (verified on this machine): the test **passes** — Answer Relevancy scored **1.0** against a **0.9 threshold**, judged by `openai/gpt-5.4` served through **OpenRouter**.
+
+> **Cosmetic warnings you can ignore:** the `portalocker` "Shared locks on Windows" message and the PostHog telemetry SSL error happen after the test finishes and do not affect results. Silence them with `uv pip install "portalocker[win32]"` and `DEEPEVAL_TELEMETRY_OPT_OUT=true`.
+
+---
+
+## Configuring the LLM provider (API keys)
+
+DeepEval does **not** read `pip install`-style global config — it reads **environment variables**, and it loads them automatically from a `.env` file in the project folder. So: no manual `export` needed; just keep the variables in `.env`.
+
+### This project: OpenRouter
+
+OpenRouter is an OpenAI-compatible gateway that lets you call many models with one API key. Copy `.env.example` to `.env` and fill in your key:
+
+| Variable | Meaning |
+|---|---|
+| `USE_OPENROUTER_MODEL=true` | **Opts into** OpenRouter as the active provider. Without an explicit provider choice deepeval falls back to OpenAI. |
+| `OPENROUTER_API_KEY=sk-or-...` | Your OpenRouter key (note the exact name — `OPEN_ROUTER_API_KEY` with an extra underscore is NOT read and silently ignored). |
+| `OPENROUTER_MODEL_NAME=` | Optional. Leave empty to use deepeval's default (see below). |
+
+> **Why the error said "OpenAI API key is not configured":** the metric needs *an* LLM, and OpenAI is deepeval's built-in **fallback provider**. Because we hadn't opted into any provider (and the key name in `.env` was wrong), deepeval fell back to OpenAI and demanded `OPENAI_API_KEY`.
+
+### Default judge model (nothing configured)
+
+- **Provider fallback:** if no `USE_*_MODEL` flag is set → **OpenAI**, and it will fail unless `OPENAI_API_KEY` exists.
+- **With OpenRouter selected** but no `OPENROUTER_MODEL_NAME` → the default judge model is **`openai/gpt-5.4`** (routed through OpenRouter). You can override with any model id OpenRouter supports, e.g. `OPENROUTER_MODEL_NAME=anthropic/claude-opus-5`.
+
+To use OpenAI instead of OpenRouter, your `.env` would contain `USE_OPENAI_MODEL=true` + `OPENAI_API_KEY=sk-...` instead.
