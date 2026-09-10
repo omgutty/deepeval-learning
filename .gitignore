@@ -4,6 +4,12 @@
 # Python / uv virtual environment
 .venv/
 
+# Node dependencies / build output
+node_modules/
+
+# Local vector store (regenerate with POST /api/ingest/seed)
+chroma_db/
+
 # Environment / secrets — never commit these
 .env
 .env.local
