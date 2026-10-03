@@ -32,3 +32,4 @@ def test_judge_is_configured():
 
     out, _ = build_judge().generate("Reply with the single word: ok")
     assert isinstance(out, str) and out.strip()
+
